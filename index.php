@@ -1,109 +1,100 @@
+<?php
+// function akan ambil dari calculator.php untuk dapatkan function untuk calculate electricity
+require_once 'calculator.php';
+$voltage = $current = $rate = $hourlyEnergy = $hourlyTotal = $dailyEnergy = $dailyTotal = '';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $voltage = $_POST["voltage"];
+    $current = $_POST["current"];
+    $rate = $_POST["rate"];
+
+    [$hourlyEnergy, $hourlyTotal, $dailyEnergy, $dailyTotal] = calculateHour($voltage, $current, $rate);
+}
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>Assignment_Junior</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            text-align: center;
+            margin-top: 50px;
         }
-        .result-container {
-            margin-top: 20px;
+
+        .result-container,
+        .result-summary {
             border: 1px solid blue;
             padding: 10px;
+            margin-top: 30px;
+            text-align: left;
             color: blue;
-            font-size: 30px;
-            font-weight: bold;
-        }
-        .result-table {
-            margin-top: 20px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>TNB Electricity Calculator</h2>
-        <form method="post" action="">
+        <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
             <div class="form-group">
-                <label for="voltage">Voltage (V):</label>
-                <input type="number" class="form-control" id="voltage" name="voltage" required>
-                <label>Voltage (V)</label>
+                <label for="voltage">Voltage (V):</label><br>
+                <input type="number" name="voltage" step="0.01" required><br>
+                <label>Voltage (v)</label>
             </div>
             <div class="form-group">
-                <label for="current">Current (A):</label>
-                <input type="number" step="any" class="form-control" id="current" name="current" required>
+                <label for="current">Current (A):</label><br>
+                <input type="number" name="current" step="0.01" required><br>
                 <label>Ampere (A)</label>
             </div>
             <div class="form-group">
-                <label for="rate">Current Rate:</label>
-                <input type="number" step="any" class="form-control" id="rate" name="rate" required>
+                <label for="rate">Current Rate (RM):</label><br>
+                <input type="number" name="rate" step="0.01" required><br>
                 <label>sen/kWh</label>
             </div>
-            <button type="submit" class="btn btn-primary">Calculate</button>
+            <div class="form-group">
+                <button type="submit" name="calculate" class="btn btn-primary">Calculate</button>
+            </div>
         </form>
+
+        <?php if ($_SERVER["REQUEST_METHOD"] == "POST") { ?>
+            <div class="result-container">
+                <h3>Results (Per Hour)</h3>
+                <p>Power: <?php echo number_format(calculatePower($voltage, $current), 2); ?> kW</p>
+                <p>Rate: <?php echo number_format($rate / 100, 3); ?> RM</p>
+            </div>
+
+            <div class="result-summary">
+                <h3>Daily Consumption (Per Day)</h3>
+                <p>Total Energy (kWh): <?php echo $dailyEnergy; ?></p>
+                <p>Total Charge (RM): <?php echo $dailyTotal; ?></p>
+            </div>
+
+            <div class="container result-table">
+                <h3>Hourly Consumption</h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Hour</th>
+                            <th>Energy (kWh)</th>
+                            <th>Total (RM)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php for ($hour = 1; $hour <= 24; $hour++): ?>
+                            <tr>
+                                <td><?php echo $hour; ?></td>
+                                <td><?php echo $hour; ?></td>
+                                <td><?php echo $hourlyEnergy[$hour]; ?></td>
+                                <td><?php echo $hourlyTotal[$hour]; ?></td>
+                            </tr>
+                        <?php endfor; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php } ?>
     </div>
-    
-    <?php
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $voltage = $_POST["voltage"];
-        $current = $_POST["current"];
-        $rate = $_POST["rate"];
-        
-        // untuk ubah watt ke Kwatt kena letak /1000.
-        // calculation fomula untuk power
-        $power = ($voltage * $current) / 1000;
-
-        // untuk calculate energy and total charge untuk setiap jam.
-        $hourlyEnergy = $hourlyTotal = [];
-
-        for ($hour = 1; $hour <= 24; $hour++) {
-            $energy = $power * $hour;
-            $total = $energy * ($rate / 100);
-            $hourlyEnergy[$hour] = number_format($energy, 5);
-            $hourlyTotal[$hour] = number_format($total, 2);
-        }
-    ?>
-    
-    <div class="container result-container">
-        <h3>Results</h3>
-        <p>Power: <?php echo $power; ?> kW</p>
-        <p>Rate: RM <?php echo $rate; ?></p>
-    </div>
-
-
-    <div class="container result-table">
-        <h3>Hourly Consumption</h3>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Hour</th>
-                    <th>Energy (kWh)</th>
-                    <th>Total (RM)</th>
-                </tr>
-            </thead>
-            <tbody>
-
-                <?php 
-                // untuk table 
-                for ($hour = 1; $hour <= 24; $hour++): 
-                ?>
-                <tr>
-                    <td><?php echo $hour; ?></td>
-                    <td><?php echo number_format($power * $hour, 5); ?></td>
-                    <td>RM <?php echo number_format(($power * $hour) * ($rate / 100), 2); ?></td>
-                </tr>
-
-                <?php 
-              endfor; 
-              ?>
-              
-            </tbody>
-        </table>
-    </div>
-    <?php } ?>
-
 </body>
 </html>
