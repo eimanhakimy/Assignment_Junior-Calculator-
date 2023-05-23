@@ -12,7 +12,7 @@ To run the TNB Electricity Calculator project, you can follow these steps:
 
 6. Save the file.
 
-7. Open a web browser and navigate to http://localhost/tnb-calculator (replace tnb-calculator with the name you chose for your directory).
+7. Open a web browser and navigate to http://localhost/index.php 
 
 8. You should see the TNB Electricity Calculator web page.
 
@@ -22,4 +22,4 @@ To run the TNB Electricity Calculator project, you can follow these steps:
 
 11. The results, including the power, rate, hourly consumption, and daily consumption, should be displayed on the page.
 
-12. By following these steps, you will be able to run the TNB Electricity Calculator project using XAMPP. Make sure XAMPP's Apache and MySQL services are running to execute the PHP code.
+By following these steps, you will be able to run the TNB Electricity Calculator project using XAMPP. Make sure XAMPP's Apache and MySQL services are running to execute the PHP code.
